@@ -1,29 +1,24 @@
-var Config = require("./config.js")();
-var BodyTypes = Config.bodyTypes;
-var RequestType = Config.requestTypes;
+module.exports = (Config) => {
 
-module.exports = () => {
-	var init = () => {
+  var BodyTypes = Config.bodyTypes;
+  var UnitTypes = Config.unitTypes;
+  var RequestType = Config.requestTypes;
 
+	var basicHarvester = UnitTypes.harvester.basic;
+
+	var createSpawnRequest = (unitShape) => {
+		return {
+      type: RequestType.SPAWN,
+      unit: basicHarvester.create(),
+      priority: 100
+    };
 	};
 
-	var basicHarvester = {
-    body: [
-      BodyTypes.WORK.val,
-      BodyTypes.CARRY.val,
-      BodyTypes.MOVE.val
-    ]
-  };
-
-	var createSpawnRequest  = (unitShape) => {
-		return { type: RequestType.SPAWN, unit: basicHarvester };
-	}
 	var spawnRequests = () => {
 		return [ createSpawnRequest(basicHarvester) ];
 	};
 
 	return {
-		init: init,
 		spawnRequests: spawnRequests
 	};
 };

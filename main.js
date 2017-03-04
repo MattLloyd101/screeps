@@ -1,34 +1,24 @@
-var roleHarvester = require('role.harvester.v1');
-var roleUpgrader = require('role.upgrader.v1');
-var roleBuilder = require('role.builder.v1');
+var _ = require("lodash");
+var Config = require('./config')();
+var PrioritiserFactory = require('./controller.prioritiser.v1');
+var SpawnControllerFactory = require('./controller.spawn.v1');
+var HarvesterStrategyFactory = require('./strategy.harvester.v1');
+
+var harvesterStrategy = HarvesterStrategyFactory(Config);
+var spawnController = SpawnControllerFactory();
+var strategies = [harvesterStrategy];
+var prioritiser = PrioritiserFactory(strategies, spawnController);
+
 
 module.exports.loop = function () {
+  var spawns = _.values(Game.spawns);
+  spawnController.init(spawns);
+  prioritiser.performSpawns();
 
-    var tower = Game.getObjectById('69a32e7dde550e175015fb30');
-    if(tower) {
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
-        });
-        if(closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
-        }
-
-        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if(closestHostile) {
-            tower.attack(closestHostile);
-        }
+  for(var name in Game.creeps) {
+    var creep = Game.creeps[name];
+    if(creep.memory.role == 'harvester.basic') {
+        roleHarvester.run(creep);
     }
-
-    for(var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if(creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
-        }
-        if(creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep);
-        }
-        if(creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
-        }
-    }
-}
+  }
+};

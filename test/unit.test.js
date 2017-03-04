@@ -28,11 +28,8 @@ describe('Unit', () => {
         ]
       };
       expect(creatableUnit).to.deep.equal(expectedUnit);
-    });
-  });
 
-    describe('#create()', () => {
-    it('Should transform the unit prototype into a creatable unit', () => {
+      // more complicated example
       var unitPrototype = {
         body: {
           WORK: 5,
@@ -60,6 +57,7 @@ describe('Unit', () => {
       };
       expect(creatableUnit).to.deep.equal(expectedUnit);
     });
+
   });
 
   describe('#buildCost()', () => {
@@ -77,11 +75,8 @@ describe('Unit', () => {
 
       var expedctedBuildCost = 200;
       expect(buildCost).to.equal(expedctedBuildCost);
-    });
-  });
 
-  describe('#buildCost()', () => {
-    it('Should calculate the build cost from the prototype.', () => {
+      // more complicated example
       var unitPrototype = {
         body: {
           WORK: 5,

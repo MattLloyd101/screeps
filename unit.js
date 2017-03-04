@@ -1,10 +1,9 @@
-var _ = require("./lodash");
-var Config = require("./config.js")();
-var BodyTypes = Config.bodyTypes;
+var _ = require("./lodash.poly");
+var BodyTypes = require("./config.bodyTypes");
 
 module.exports = (unitPrototype) => {
 
-  var renderedBody = _.flatMap(_.entries(unitPrototype.body), (bodyTypeCount) => {
+  var renderedBody = _.flatMap(_.pairs(unitPrototype.body), (bodyTypeCount) => {
     var bodyTypeKey = bodyTypeCount[0];
     var count = bodyTypeCount[1];
     return _.times(count, _.constant(BodyTypes[bodyTypeKey]));

@@ -1,13 +1,40 @@
+var _ = require('./lodash.poly');
+var Config = require('./config')();
+var BodyTypes = Config.bodyTypes;
 
 module.exports = () => {
-	var init = (spawnList) => {
-		
-		return {
 
-		};
-	};
+  var TEST_CREEP = Config.unitTypes.harvester.basic.create().body;
+
+  var spawnList;
+
+  var init = (_spawnList) => {
+    spawnList = _spawnList;
+  };
+
+  var spawnersThatCanSpawn = () => {
+    return _.filter(spawnList, (spawner) => {
+      var value = spawner.canCreateCreep(TEST_CREEP);
+      return value === 0;
+    });
+  };
+
+	var canSpawnCount = () => {
+    return spawnersThatCanSpawn().length;
+  };
+
+  var spawn = (unit) => {
+
+    if(canSpawnCount() <= 0) return false;
+    var spawner = _.first(spawnersThatCanSpawn());
+
+    console.log("Spawning Unit:", JSON.stringify(unit));
+    return spawner.createCreep(unit.body, undefined, { role: unit.role }) === 0;
+  };
 
 	return {
-		init: init
+    init: init,
+    canSpawnCount: canSpawnCount,
+    spawn: spawn
 	};
-};
+}
