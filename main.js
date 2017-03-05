@@ -1,7 +1,9 @@
-var _ = require("lodash");
+var _ = require('./lodash.poly');
 var Config = require('./config');
 
 var rootMessageBus = require('./messageBus')();
+
+var WorldData = require('./worldData')(Game);
 
 // Controllers
 var PrioritiserFactory = require('./controller.prioritiser.v1');
@@ -15,11 +17,11 @@ var HarvesterStrategyFactory = require('./strategy.harvester.v1');
 var BasicHarvesterRoleFactory = require('./role.harvester.basic');
 
 // Role instantiation
-var basicHarvesterRole = BasicHarvesterRoleFactory(rootMessageBus);
+var basicHarvesterRole = BasicHarvesterRoleFactory(Game, rootMessageBus);
 var roleDefinitions = { "harvester.basic": basicHarvesterRole };
 
 // Strategy instantiation
-var harvesterStrategy = HarvesterStrategyFactory(Config, rootMessageBus);
+var harvesterStrategy = HarvesterStrategyFactory(Config, rootMessageBus, WorldData);
 var strategies = [harvesterStrategy];
 
 // Controller instantiation
@@ -29,9 +31,12 @@ var prioritiser = PrioritiserFactory(strategies, spawnController);
 
 
 module.exports.loop = function () {
+  // TODO: Garbage Collection from Memory.creeps/spawns/rooms/flags
+
+  WorldData.init();
   var spawns = _.values(Game.spawns);
   spawnController.init(spawns);
   prioritiser.performSpawns();
 
-  //roleController.performRoles(Game.creeps);
+  roleController.performRoles(Game.creeps);
 };

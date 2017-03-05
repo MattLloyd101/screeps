@@ -4,7 +4,7 @@ var State = require('./state');
 var Role = require('./role');
 var RoleType = "harvester.basic";
 
-module.exports = (messageBus) => {
+module.exports = (Game, messageBus) => {
 
   // Predicates
   var isFull = (creep) => {
@@ -13,8 +13,18 @@ module.exports = (messageBus) => {
   };
 
   var hasTarget = (creep) => {
-    var target = creep.memory.target;
-    return _.isUndefined(target) ? false : !_.isUndefined(target.x) && !_.isUndefined(target.y);
+    var targetId = creep.memory.target;
+    var target = Game.getObjectById(targetId);
+
+    var hasTarget = !_.isNil(target)
+    if(!hasTarget) return false;
+
+    var pos = target.pos;
+    var hasPos = !_.isNil(pos);
+    if(!hasPos) return false;
+
+    var validPos = !_.isNil(pos.x) && !_.isNil(pos.y) && !_.isNil(pos.roomName);
+    return validPos;
   };
 
   var hasDepositedAllEnergy = (creep) => {
@@ -52,16 +62,18 @@ module.exports = (messageBus) => {
     };
 
     var message = {
-      type: Config.HARVEST_TARGET_REQUEST,
+      type: Config.messageTypes.HARVEST_TARGET_REQUEST,
       pos: creep.pos,
       callback: assignTarget
     };
 
+    if(Config.VERBOSE) console.log("Creep(" + creep + ") requesting harvest target: ", JSON.stringify(message));
     messageBus(message);
   };
 
   var harvest = (creep) => {
-    var target = creep.memory.target;
+    var targetId = creep.memory.target;
+    var target = Game.getObjectById(targetId);
     var returnCode = creep.harvest(target);
     var needsToMove = returnCode === Config.errorCodes.ERR_NOT_IN_RANGE;
     if(needsToMove) {

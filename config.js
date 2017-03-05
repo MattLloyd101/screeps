@@ -37,5 +37,14 @@ module.exports = {
     ERR_INVALID_TARGET: -7,
     ERR_NOT_IN_RANGE: -9,
     ERR_NO_BODYPOART: -12
+  },
+  room: {
+    TOP: 0,
+    LEFT: 0,
+    BOTTOM: 49,
+    RIGHT: 49
+  },
+  objectTypes: {
+    SOURCE: 'source'
   }
 };
