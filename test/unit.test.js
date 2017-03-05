@@ -1,6 +1,6 @@
 
 var expect = require('chai').expect;
-var Config = require('../config')();
+var Config = require('../config');
 var BodyTypes = Config.bodyTypes;
 var RequestType = Config.requestTypes;
 

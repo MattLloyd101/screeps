@@ -1,6 +1,6 @@
 
 var expect = require('chai').expect;
-var Config = require('../config')();
+var Config = require('../config');
 var Unit = require('../Unit');
 
 var UnitTypes = Config.unitTypes;
@@ -10,7 +10,9 @@ var RequestType = Config.requestTypes;
 var HarvesterStrategyFactory = require('../strategy.harvester.v1');
 
 describe('Harvester Strategy', () => {
+
 	describe('#spawnRequests()', () => {
+
 		it('Should request a new basic harvester when harvesters == 0', () => {
 			var harvesterStrategy = HarvesterStrategyFactory(Config);
 
@@ -27,5 +29,7 @@ describe('Harvester Strategy', () => {
 
 			expect(spawnRequest).to.deep.equal(expectedSpawnRequest);
 		});
+
 	});
+
 });

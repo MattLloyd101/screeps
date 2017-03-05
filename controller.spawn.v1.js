@@ -1,5 +1,5 @@
 var _ = require('./lodash.poly');
-var Config = require('./config')();
+var Config = require('./config');
 var BodyTypes = Config.bodyTypes;
 
 module.exports = () => {
@@ -28,7 +28,8 @@ module.exports = () => {
     if(canSpawnCount() <= 0) return false;
     var spawner = _.first(spawnersThatCanSpawn());
 
-    console.log("Spawning Unit:", JSON.stringify(unit));
+    if(Config.INFO) console.log("Spawning Unit:", unit.role);
+    if(Config.DEBUG) console.log("    ", unit.body);
     return spawner.createCreep(unit.body, undefined, { role: unit.role }) === 0;
   };
 
@@ -38,3 +39,4 @@ module.exports = () => {
     spawn: spawn
 	};
 }
+

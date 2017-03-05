@@ -1,6 +1,6 @@
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var Config = require('../config')();
+var Config = require('../config');
 var BodyTypes = Config.bodyTypes;
 var RequestType = Config.requestTypes;
 
@@ -11,17 +11,17 @@ var bodyB = {};
 var bodyC = {};
 var requestA = {
   type: 'spawn',
-  body: bodyA,
+  unit: bodyA,
   priority: 1
 };
 var requestB = {
   type: 'spawn',
-  body: bodyB,
+  unit: bodyB,
   priority: -1
 };
 var requestC = {
   type: 'spawn',
-  body: bodyC,
+  unit: bodyC,
   priority: 5
 };
 var aStrategyMock = {
