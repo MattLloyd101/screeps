@@ -24,7 +24,7 @@ describe('Harvester Strategy', () => {
       var expectedSpawnRequest = {
         type: RequestType.SPAWN,
         unit: UnitTypes.harvester.basic.create(),
-        priority: 100
+        priority: 1
       };
 
 			expect(spawnRequest).to.deep.equal(expectedSpawnRequest);

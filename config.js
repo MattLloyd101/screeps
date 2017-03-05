@@ -23,10 +23,29 @@ module.exports = {
 	bodyTypes: bodyTypes,
 	unitTypes: unitTypes,
 	requestTypes: {
-		SPAWN: 'spawn'
+		SPAWN: 'spawn',
+    ENERGY: 'energy'
 	},
+  objectTypes: {
+    SOURCE: 'source',
+    STRUCTURE: 'structure',
+    TERRAIN: 'terrain',
+    CREEP: 'creep'
+  },
   messageTypes: {
-    HARVEST_TARGET_REQUEST: 'harvestTargetRequest'
+    HARVEST_TARGET_REQUEST: 'harvestTargetRequest',
+    ENERGY_DELIVERY_TARGET_REQUEST: 'energyDeliveryTargetRequest',
+  },
+  structureTypes: {
+    SPAWN: 'spawn',
+    CONTROLLER: 'controller'
+  },
+  resourceType: {
+    RESOURCE_ENERGY: 'energy'
+  },
+  terrainTypes: {
+    WALL: 'wall',
+    PLAIN: 'plain'
   },
   errorCodes: {
     OK: 0,
@@ -36,6 +55,7 @@ module.exports = {
     ERR_NOT_ENOUGH_RESOURCES: -6,
     ERR_INVALID_TARGET: -7,
     ERR_NOT_IN_RANGE: -9,
+    ERR_TIRED: -11,
     ERR_NO_BODYPOART: -12
   },
   room: {
@@ -43,8 +63,5 @@ module.exports = {
     LEFT: 0,
     BOTTOM: 49,
     RIGHT: 49
-  },
-  objectTypes: {
-    SOURCE: 'source'
   }
 };

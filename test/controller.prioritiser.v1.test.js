@@ -1,6 +1,7 @@
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var Config = require('../config');
+var messageBus = require('../messageBus')();
 var BodyTypes = Config.bodyTypes;
 var RequestType = Config.requestTypes;
 
@@ -57,9 +58,9 @@ describe('Prioritisation controller', () => {
       var spawnControllerMock = {
         spawn: sinon.spy()
       };
-			var prioritiser = PrioritiserFactory(strategies, spawnControllerMock);
+			var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawns();
+      var spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests).to.have.members([]);
       expect(aStrategyMock.spawnRequests.calledOnce).to.be.true;
@@ -68,17 +69,17 @@ describe('Prioritisation controller', () => {
 		});
 
     it('Should merge multiple strategies requests', () => {
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock);
+      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawns();
+      var spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests).to.deep.have.members([bodyA, bodyB, bodyC]);
     });
 
     it('Should order the requested strategies by priority', () => {
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock);
+      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawns();
+      var spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests[0]).to.equal(bodyC);
       expect(spawnRequests[1]).to.equal(bodyA);
@@ -94,7 +95,7 @@ describe('Prioritisation controller', () => {
         canSpawnCount: sinon.stub().returns(0),
         spawn: sinon.spy()
       };
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock);
+      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
       prioritiser.performSpawns();
 

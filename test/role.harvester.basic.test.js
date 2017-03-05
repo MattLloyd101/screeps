@@ -151,7 +151,7 @@ describe('Basic Harvester Role', () => {
       var calledMessage = bus.getCalls()[0].args[0];
       expect(calledMessage.type).to.equal(Config.messageTypes.HARVEST_TARGET_REQUEST);
       expect(calledMessage.pos).to.equal(position);
-      var newTarget = {};
+      var newTarget = "newId";
 
       calledMessage.callback(newTarget);
       expect(creep.memory.target).to.equal(newTarget);
@@ -189,6 +189,39 @@ describe('Basic Harvester Role', () => {
 
       expect(creep.harvest.calledOnce).to.be.true;
       expect(creep.moveTo.calledOnce).to.be.true;
+    });
+
+    it('Should request a deliver target via the Bus when role is needsDeliverTarget', () => {
+      var position = {
+        roomName: 'room',
+        x: 42,
+        y: 43
+      };
+      var energy = 50;
+      var creep = {
+        pos: position,
+        carry: {
+          energy: energy
+        },
+        memory: {
+          role: 'harvester.basic.needsDeliverTarget',
+        }
+      };
+      var bus = sinon.spy();
+
+      var basicHarvesterRole = require('../role.harvester.basic')(null, bus);
+
+      basicHarvesterRole.run(creep);
+
+      expect(bus.calledOnce).to.be.true;
+      var calledMessage = bus.getCalls()[0].args[0];
+      expect(calledMessage.type).to.equal(Config.messageTypes.ENERGY_DELIVERY_TARGET_REQUEST);
+      expect(calledMessage.pos).to.equal(position);
+      expect(calledMessage.energy).to.equal(energy);
+      var newTarget = "newId";
+
+      calledMessage.callback(newTarget);
+      expect(creep.memory.target).to.equal(newTarget);
     });
 
   });

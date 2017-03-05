@@ -12,6 +12,8 @@ var SpawnControllerFactory = require('./controller.spawn.v1');
 
 // Strategies
 var HarvesterStrategyFactory = require('./strategy.harvester.v1');
+var SpawnStrategyFactory = require('./strategy.spawn.v1');
+var ControllerStrategyFactory = require('./strategy.controller.v1');
 
 // Roles
 var BasicHarvesterRoleFactory = require('./role.harvester.basic');
@@ -22,12 +24,14 @@ var roleDefinitions = { "harvester.basic": basicHarvesterRole };
 
 // Strategy instantiation
 var harvesterStrategy = HarvesterStrategyFactory(Config, rootMessageBus, WorldData);
-var strategies = [harvesterStrategy];
+var spawnStrategy = SpawnStrategyFactory(Config, rootMessageBus, WorldData);
+var controllerStrategy = ControllerStrategyFactory(Config, rootMessageBus, WorldData);
+var strategies = [harvesterStrategy, spawnStrategy, controllerStrategy];
 
 // Controller instantiation
-var spawnController = SpawnControllerFactory();
+var spawnController = SpawnControllerFactory(spawnStrategy);
 var roleController = RoleControllerFactory(Config, roleDefinitions);
-var prioritiser = PrioritiserFactory(strategies, spawnController);
+var prioritiser = PrioritiserFactory(strategies, spawnController, rootMessageBus);
 
 
 module.exports.loop = function () {
@@ -40,3 +44,5 @@ module.exports.loop = function () {
 
   roleController.performRoles(Game.creeps);
 };
+
+

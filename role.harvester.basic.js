@@ -34,7 +34,13 @@ module.exports = (Game, messageBus) => {
   // Transition Actions
   var removeTarget = (creep) => {
     delete creep.memory.target;
-  }
+  };
+
+  var assignTarget = (creep) => {
+    return (target) => {
+      creep.memory.target = target;
+    };
+  };
 
   // States & Transitions
   var RootState = State(RoleType);
@@ -56,25 +62,49 @@ module.exports = (Game, messageBus) => {
   var allTransitions = _.flatMap(states, (state) => state.transitions);
 
   // Sub Roles
+  var sendBusMessage = (creep, message) => {
+    if(Config.VERBOSE) console.log("Creep(" + creep + ") requesting harvest target: ", JSON.stringify(message));
+    messageBus(message);
+  };
+
   var askForHarvestTarget = (creep) => {
-    var assignTarget = (target) => {
-      creep.memory.target = target;
-    };
 
     var message = {
       type: Config.messageTypes.HARVEST_TARGET_REQUEST,
       pos: creep.pos,
-      callback: assignTarget
+      callback: assignTarget(creep)
     };
 
-    if(Config.VERBOSE) console.log("Creep(" + creep + ") requesting harvest target: ", JSON.stringify(message));
-    messageBus(message);
+    sendBusMessage(creep, message);
+  };
+
+  var askForDeliverTarget = (creep) => {
+
+    var message = {
+      type: Config.messageTypes.ENERGY_DELIVERY_TARGET_REQUEST,
+      pos: creep.pos,
+      energy: creep.carry.energy,
+      callback: assignTarget(creep)
+    };
+
+    sendBusMessage(creep, message);
   };
 
   var harvest = (creep) => {
     var targetId = creep.memory.target;
     var target = Game.getObjectById(targetId);
+
     var returnCode = creep.harvest(target);
+    var needsToMove = returnCode === Config.errorCodes.ERR_NOT_IN_RANGE;
+    if(needsToMove) {
+      creep.moveTo(target);
+    }
+  };
+
+  var deliver = (creep) => {
+    var targetId = creep.memory.target;
+    var target = Game.getObjectById(targetId);
+    var returnCode = creep.transfer(target, Config.resourceType.RESOURCE_ENERGY);
     var needsToMove = returnCode === Config.errorCodes.ERR_NOT_IN_RANGE;
     if(needsToMove) {
       creep.moveTo(target);
@@ -100,11 +130,11 @@ module.exports = (Game, messageBus) => {
       break;
 
       case 'needsDeliverTarget':
-
+        askForDeliverTarget(creep);
       break;
 
       case 'delivering':
-
+        deliver(creep);
       break;
 
       default:
