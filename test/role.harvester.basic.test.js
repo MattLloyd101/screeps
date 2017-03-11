@@ -1,68 +1,81 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
+
+const createGameSpy = (response) => ({
+  getObjectById: sinon.stub().returns(response)
+});
+
+const createBehaviourSpy = () => ({
+    askForHarvestTarget: sinon.spy(),
+    askForDeliverTarget: sinon.spy(),
+    harvest: sinon.spy(),
+    deliver: sinon.spy(),
+    removeTarget: sinon.spy()
+});
+
+const createHarvesterRole = (Game, behaviour) => {
+  Game = Game || createGameSpy();
+  behaviour = behaviour || createBehaviourSpy();
+  return require('../role.harvester.basic')(Game, behaviour);
+};
 
 describe('Basic Harvester Role', () => {
 
 	describe('#transition()', () => {
 
 		it('Should transition from the root role to needsHarvestTarget', () => {
-      var creep = {
+      const creep = {
         memory: {
           role: 'harvester.basic'
         }
       };
 
-      var basicHarvesterRole = require('../role.harvester.basic')();
-      var applied = basicHarvesterRole.transition(creep);
+      const basicHarvesterRole = createHarvesterRole();
+      const applied = basicHarvesterRole.transition(creep);
 
 			expect(creep.memory.role).to.equal('harvester.basic.needsHarvestTarget');
       expect(applied).to.be.true;
 		});
 
     it('Should not transition from needsHarvestTarget role to needsHarvestTarget', () => {
-      var Game = {
-        getObjectById: sinon.stub().returns(null)
-      };
-      var creep = {
+      const creep = {
         memory: {
           role: 'harvester.basic.needsHarvestTarget'
         }
       };
 
-      var basicHarvesterRole = require('../role.harvester.basic')(Game);
-      var applied = basicHarvesterRole.transition(creep);
+      const basicHarvesterRole = createHarvesterRole();
+      const applied = basicHarvesterRole.transition(creep);
 
       expect(creep.memory.role).to.equal('harvester.basic.needsHarvestTarget');
       expect(applied).to.be.false;
     });
 
     it('Should transition from needsHarvestTarget role to harvesting when we have a collect target', () => {
-      var Game = {
-        getObjectById: sinon.stub().returns({
-          pos: {
-            x: 1,
-            y: 1,
-            roomName: ''
-          }
-        })
-      };
-      var creep = {
+      const creep = {
         memory: {
           role: 'harvester.basic.needsHarvestTarget',
           target: 'id1'
         }
       };
-
-      var basicHarvesterRole = require('../role.harvester.basic')(Game);
-      var applied = basicHarvesterRole.transition(creep);
+      const Game = createGameSpy({
+        pos: {
+          x: 1,
+          y: 1,
+          roomName: ''
+        }
+      });
+      const basicHarvesterRole = createHarvesterRole(Game);
+      const applied = basicHarvesterRole.transition(creep);
 
       expect(creep.memory.role).to.equal('harvester.basic.harvesting');
       expect(applied).to.be.true;
     });
 
     it('Should transition from harvesting role to needsDeliverTarget when we cannot collect anymore', () => {
-      var creep = {
+      const creep = {
         carry: {
           energy: 50
         },
@@ -73,33 +86,32 @@ describe('Basic Harvester Role', () => {
         }
       };
 
-      var basicHarvesterRole = require('../role.harvester.basic')();
-      var applied = basicHarvesterRole.transition(creep);
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
+      const applied = basicHarvesterRole.transition(creep);
 
       expect(creep.memory.role).to.equal('harvester.basic.needsDeliverTarget');
       expect(applied).to.be.true;
-      expect(creep.memory.target).to.be.undefined;
+      expect(behaviour.removeTarget.calledOnce).to.be.true;
     });
 
     it('Should transition from needsDeliverTarget role to delivering when we have a deliver target', () => {
-      var Game = {
-        getObjectById: sinon.stub().returns({
-          pos: {
-            x: 1,
-            y: 1,
-            roomName: ''
-          }
-        })
-      };
-      var creep = {
+      const Game = createGameSpy({
+        pos: {
+          x: 1,
+          y: 1,
+          roomName: ''
+        }
+      });
+      const creep = {
         memory: {
           role: 'harvester.basic.needsDeliverTarget',
           target: 'id1'
         }
       };
 
-      var basicHarvesterRole = require('../role.harvester.basic')(Game);
-      var applied = basicHarvesterRole.transition(creep);
+      const basicHarvesterRole = createHarvesterRole(Game);
+      const applied = basicHarvesterRole.transition(creep);
 
       expect(creep.memory.role).to.equal('harvester.basic.delivering');
       expect(applied).to.be.true;
@@ -107,7 +119,7 @@ describe('Basic Harvester Role', () => {
 
 
     it('Should transition from delivering role to needsHarvestTarget when we have delivered all of our energy', () => {
-      var creep = {
+      const creep = {
         carry: {
           energy: 0
         },
@@ -117,111 +129,76 @@ describe('Basic Harvester Role', () => {
         }
       };
 
-      var basicHarvesterRole = require('../role.harvester.basic')();
-      var applied = basicHarvesterRole.transition(creep);
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
+      const applied = basicHarvesterRole.transition(creep);
 
       expect(creep.memory.role).to.equal('harvester.basic.needsHarvestTarget');
       expect(applied).to.be.true;
-      expect(creep.memory.target).to.be.undefined;
+      expect(behaviour.removeTarget.calledOnce).to.be.true;
     });
 
 	});
 
   describe('#run()', () => {
 
-    it('Should request a harvest target via the Bus when role is needsHarvestTarget', () => {
-      var position = {
-        roomName: 'room',
-        x: 42,
-        y: 43
-      };
-      var creep = {
-        pos: position,
+    it('Should call askForHarvestTarget when role state == needsHarvestTarget', () => {
+      const creep = {
         memory: {
           role: 'harvester.basic.needsHarvestTarget',
         }
       };
-      var bus = sinon.spy();
 
-      var basicHarvesterRole = require('../role.harvester.basic')(null, bus);
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
 
       basicHarvesterRole.run(creep);
 
-      expect(bus.calledOnce).to.be.true;
-      var calledMessage = bus.getCalls()[0].args[0];
-      expect(calledMessage.type).to.equal(Config.messageTypes.HARVEST_TARGET_REQUEST);
-      expect(calledMessage.pos).to.equal(position);
-      var newTarget = "newId";
-
-      calledMessage.callback(newTarget);
-      expect(creep.memory.target).to.equal(newTarget);
+      expect(behaviour.askForHarvestTarget.calledOnce).to.be.true;
+      expect(behaviour.askForHarvestTarget.calledWith(creep)).to.be.true;
     });
 
 
-    it('Should move towards the target when role is harvesting and not next to target.', () => {
-      var Game = {
-        getObjectById: sinon.stub().returns({
-          pos: {
-            x: 1,
-            y: 1,
-            roomName: ''
-          }
-        })
-      };
-      var position = {
-        roomName: 'room',
-        x: 42,
-        y: 43
-      };
-      var target = 'id1';
-      var creep = {
-        harvest: sinon.stub().returns(Config.errorCodes.ERR_NOT_IN_RANGE),
-        moveTo: sinon.spy(),
-        pos: position,
+    it('Should call harvest when role state == harvesting', () => {
+      const creep = {
         memory: {
-          role: 'harvester.basic.harvesting',
-          target: target
+          role: 'harvester.basic.harvesting'
         }
       };
-
-      var basicHarvesterRole = require('../role.harvester.basic')(Game);
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
       basicHarvesterRole.run(creep);
 
-      expect(creep.harvest.calledOnce).to.be.true;
-      expect(creep.moveTo.calledOnce).to.be.true;
+      expect(behaviour.harvest.calledOnce).to.be.true;
+      expect(behaviour.harvest.calledWith(creep)).to.be.true;
     });
 
-    it('Should request a deliver target via the Bus when role is needsDeliverTarget', () => {
-      var position = {
-        roomName: 'room',
-        x: 42,
-        y: 43
-      };
-      var energy = 50;
-      var creep = {
-        pos: position,
-        carry: {
-          energy: energy
-        },
+    it('Should call askForDeliverTarget when role state == needsDeliverTarget', () => {
+      const creep = {
         memory: {
-          role: 'harvester.basic.needsDeliverTarget',
+          role: 'harvester.basic.needsDeliverTarget'
         }
       };
-      var bus = sinon.spy();
-
-      var basicHarvesterRole = require('../role.harvester.basic')(null, bus);
-
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
       basicHarvesterRole.run(creep);
 
-      expect(bus.calledOnce).to.be.true;
-      var calledMessage = bus.getCalls()[0].args[0];
-      expect(calledMessage.type).to.equal(Config.messageTypes.ENERGY_DELIVERY_TARGET_REQUEST);
-      expect(calledMessage.pos).to.equal(position);
-      expect(calledMessage.energy).to.equal(energy);
-      var newTarget = "newId";
+      expect(behaviour.askForDeliverTarget.calledOnce).to.be.true;
+      expect(behaviour.askForDeliverTarget.calledWith(creep)).to.be.true;
+    });
 
-      calledMessage.callback(newTarget);
-      expect(creep.memory.target).to.equal(newTarget);
+    it('Should call deliver when role state == delivering', () => {
+      const creep = {
+        memory: {
+          role: 'harvester.basic.delivering'
+        }
+      };
+      const behaviour = createBehaviourSpy();
+      const basicHarvesterRole = createHarvesterRole(undefined, behaviour);
+      basicHarvesterRole.run(creep);
+
+      expect(behaviour.deliver.calledOnce).to.be.true;
+      expect(behaviour.deliver.calledWith(creep)).to.be.true;
     });
 
   });

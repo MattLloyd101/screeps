@@ -1,13 +1,13 @@
-var _ = require('./lodash.poly');
+const _ = require('./lodash.poly');
 
 module.exports = (Config, messageBus, WorldData) => {
 
-  var RequestType = Config.requestTypes;
+  const RequestType = Config.requestTypes;
 
   // Energy Strategy
-  var createEnergyRequest = (spawn) => {
+  const createEnergyRequest = (spawn) => {
 
-    var room = spawn.room;
+    const room = spawn.room;
     return [{
       type: RequestType.ENERGY,
       target: spawn.id,
@@ -16,16 +16,16 @@ module.exports = (Config, messageBus, WorldData) => {
     }];
   };
 
-  var energyRequests = () => {
-    var rooms = WorldData.rooms();
-    var allSpawns = _.flatMap(rooms, (room) => {
+  const energyRequests = () => {
+    const rooms = WorldData.rooms();
+    const allSpawns = _.flatMap(rooms, (room) => {
       return WorldData.filteredStructureByType(room.name, Config.structureTypes.SPAWN);
     });
 
     return _.flatMap(allSpawns, createEnergyRequest);
   };
 
-  var requestEnergy = (spawner, cost, priority) => {
+  const requestEnergy = (spawner, cost, priority) => {
     _energyRequests
   };
 

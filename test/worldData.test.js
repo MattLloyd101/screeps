@@ -1,177 +1,179 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
+
+const Config = require('../config');
 
 describe('World Data', () => {
 
-	describe('#roomData(roomId)', () => {
+  describe('#roomByName(roomName)', () => {
 
-		it('Should request room data the first time its requested', () => {
-      var stubRoomData = {
-        data: 42
-      };
-      var Game = {
+    it('Should return a room when the name matches', () => {
+      const Game = {
         rooms: {
           sim: {
-            lookAtArea: sinon.stub().returns(stubRoomData)
+            name: "sim"
           }
         }
       };
-      var worldData = require('../worldData')(Game);
-      worldData.init();
-
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledOnce).to.be.true;
-      expect(Game.rooms.sim.lookAtArea.calledWith(Config.room.TOP, Config.room.LEFT, Config.room.BOTTOM, Config.room.RIGHT, true)).to.be.true;
-      expect(roomData).to.equal(stubRoomData);
-		});
-
-    it('Should not re-request room data the second time its requested', () => {
-      var stubRoomData = {
-        data: 42
+      const createdRoom = {
+        name: sinon.stub().returns("sim")
       };
-      var Game = {
-        rooms: {
-          sim: {
-            lookAtArea: sinon.stub().returns(stubRoomData)
-          }
-        }
+      const roomFactory = {
+        create: sinon.stub().returns(createdRoom)
       };
-      var worldData = require('../worldData')(Game);
-      worldData.init();
+      const worldData = require('../worldData')(Game, roomFactory);
+      const foundRoom = worldData.roomByName("sim");
 
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledOnce).to.be.true;
-      expect(Game.rooms.sim.lookAtArea.calledWith(Config.room.TOP, Config.room.LEFT, Config.room.BOTTOM, Config.room.RIGHT, true)).to.be.true;
-      expect(roomData).to.equal(stubRoomData);
-
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledOnce).to.be.true;
+      expect(foundRoom).to.equal(createdRoom);
     });
 
-
-    it('Should re-request room data after init has been called', () => {
-      var stubRoomData = {
-        data: 42
+    it('Should return undefined when no name matches', () => {
+      const Game = {
+        rooms: {}
       };
-      var Game = {
-        rooms: {
-          sim: {
-            lookAtArea: sinon.stub().returns(stubRoomData)
-          }
-        }
+      const roomFactory = {
+        create: sinon.spy()
       };
-      var worldData = require('../worldData')(Game);
-      worldData.init();
+      const worldData = require('../worldData')(Game, roomFactory);
+      const foundRoom = worldData.roomByName("sim");
 
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledOnce).to.be.true;
-      expect(Game.rooms.sim.lookAtArea.calledWith(Config.room.TOP, Config.room.LEFT, Config.room.BOTTOM, Config.room.RIGHT, true)).to.be.true;
-      expect(roomData).to.equal(stubRoomData);
-
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledOnce).to.be.true;
-
-      worldData.init();
-
-      var roomData = worldData.roomData('sim');
-      expect(Game.rooms.sim.lookAtArea.calledTwice).to.be.true;
-      expect(Game.rooms.sim.lookAtArea.calledWith(Config.room.TOP, Config.room.LEFT, Config.room.BOTTOM, Config.room.RIGHT, true)).to.be.true;
-      expect(roomData).to.equal(stubRoomData);
-
+      expect(foundRoom).to.be.undefined;
     });
-
-	});
-
-  describe('#filteredRoomDataByType(roomId, type)', () => {
-
-    it('Should only return the requested type', () => {
-      var stubRoomData = [
-        { "type": "source" },
-        { "type": "terrain" },
-        { "type": "terrain" },
-        { "type": "creep" },
-        { "type": "source" }
-      ];
-      var Game = {
-        rooms: {
-          sim: {
-            lookAtArea: sinon.stub().returns(stubRoomData)
-          }
-        }
-      };
-      var worldData = require('../worldData')(Game);
-
-      var sources = worldData.filteredRoomDataByType('sim', Config.objectTypes.SOURCE);
-      expect(sources).to.have.length(2);
-      expect(sources[0].type).to.equal(Config.objectTypes.SOURCE);
-      expect(sources[1].type).to.equal(Config.objectTypes.SOURCE);
-    });
-
   });
 
-  describe('#filteredStructureByType(roomId, type)', () => {
+  describe('#allSeenRooms()', () => {
 
-    it('Should only return the requested type', () => {
-      var stubRoomData = [
-        {
-          "type": "structure",
-          "structure": {
-            structureType: "spawn"
-          }
-        },
-        { "type": "terrain" },
-        {
-          "type": "structure",
-          "structure": {
-            structureType: "controller"
-          }
-        },
-        { "type": "creep" },
-        { "type": "source" },
-        {
-          "type": "structure",
-          "structure": {
-            structureType: "spawn"
-          }
-        },
-      ];
-      var Game = {
-        rooms: {
-          sim: {
-            lookAtArea: sinon.stub().returns(stubRoomData)
-          }
-        }
+    it('Should request room data the first time its requested', () => {
+      const room1 = {
+        name: "sim"
       };
-      var worldData = require('../worldData')(Game);
-
-      var sources = worldData.filteredStructureByType('sim', Config.structureTypes.SPAWN);
-      expect(sources).to.have.length(2);
-      expect(sources[0].structureType).to.equal(Config.structureTypes.SPAWN);
-      expect(sources[1].structureType).to.equal(Config.structureTypes.SPAWN);
-    });
-
-  });
-
-  describe('#rooms()', () => {
-
-    it('Should return a list of rooms', () => {
-      var room1 = {};
-      var room2 = {};
-      var Game = {
+      const room2 = {
+        name: "room2"
+      };
+      const Game = {
         rooms: {
-          room1: room1,
+          sim: room1,
           room2: room2
         }
       };
-      var worldData = require('../worldData')(Game);
+      const roomFactory = {
+        create: sinon.spy()
+      };
+      const worldData = require('../worldData')(Game, roomFactory);
 
-      var rooms = worldData.rooms();
+      const rooms = worldData.allSeenRooms();
+      expect(roomFactory.create.calledTwice).to.be.true;
       expect(rooms).to.have.length(2);
-      expect(rooms[0]).to.equal(room1);
-      expect(rooms[1]).to.equal(room2);
     });
 
+    it('Should not call the factory when no rooms are defined', () => {
+      const Game = {
+        rooms: {}
+      };
+      const roomFactory = {
+        create: sinon.spy()
+      };
+      const worldData = require('../worldData')(Game, roomFactory);
+
+      const rooms = worldData.allSeenRooms();
+      expect(roomFactory.create.called).to.be.false;
+      expect(rooms).to.have.length(0);
+    });
   });
+
+
+  //
+  // describe('#filteredRoomDataByType(roomId, type)', () => {
+  //
+  //   it('Should only return the requested type', () => {
+  //     const stubRoomData = [
+  //       {"type": "source"},
+  //       {"type": "terrain"},
+  //       {"type": "terrain"},
+  //       {"type": "creep"},
+  //       {"type": "source"}
+  //     ];
+  //     const Game = {
+  //       rooms: {
+  //         sim: {
+  //           lookAtArea: sinon.stub().returns(stubRoomData)
+  //         }
+  //       }
+  //     };
+  //     const worldData = require('../worldData')(Game);
+  //
+  //     const sources = worldData.filteredRoomDataByType('sim', Config.objectTypes.SOURCE);
+  //     expect(sources).to.have.length(2);
+  //     expect(sources[0].type).to.equal(Config.objectTypes.SOURCE);
+  //     expect(sources[1].type).to.equal(Config.objectTypes.SOURCE);
+  //   });
+  //
+  // });
+  //
+  // describe('#filteredStructureByType(roomId, type)', () => {
+  //
+  //   it('Should only return the requested type', () => {
+  //     const stubRoomData = [
+  //       {
+  //         "type": "structure",
+  //         "structure": {
+  //           structureType: "spawn"
+  //         }
+  //       },
+  //       {"type": "terrain"},
+  //       {
+  //         "type": "structure",
+  //         "structure": {
+  //           structureType: "controller"
+  //         }
+  //       },
+  //       {"type": "creep"},
+  //       {"type": "source"},
+  //       {
+  //         "type": "structure",
+  //         "structure": {
+  //           structureType: "spawn"
+  //         }
+  //       },
+  //     ];
+  //     const Game = {
+  //       rooms: {
+  //         sim: {
+  //           lookAtArea: sinon.stub().returns(stubRoomData)
+  //         }
+  //       }
+  //     };
+  //     const worldData = require('../worldData')(Game);
+  //
+  //     const sources = worldData.filteredStructureByType('sim', Config.structureTypes.SPAWN);
+  //     expect(sources).to.have.length(2);
+  //     expect(sources[0].structureType).to.equal(Config.structureTypes.SPAWN);
+  //     expect(sources[1].structureType).to.equal(Config.structureTypes.SPAWN);
+  //   });
+  //
+  // });
+  //
+  // describe('#rooms()', () => {
+  //
+  //   it('Should return a list of rooms', () => {
+  //     const room1 = {};
+  //     const room2 = {};
+  //     const Game = {
+  //       rooms: {
+  //         room1: room1,
+  //         room2: room2
+  //       }
+  //     };
+  //     const worldData = require('../worldData')(Game);
+  //
+  //     const rooms = worldData.rooms();
+  //     expect(rooms).to.have.length(2);
+  //     expect(rooms[0]).to.equal(room1);
+  //     expect(rooms[1]).to.equal(room2);
+  //   });
+  //
+  // });
 
 });

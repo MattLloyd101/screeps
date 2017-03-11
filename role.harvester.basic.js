@@ -1,140 +1,76 @@
-var _ = require('./lodash.poly');
-var Config = require('./config');
-var State = require('./state');
-var Role = require('./role');
-var RoleType = "harvester.basic";
+const _ = require('./lodash.poly');
+const State = require('./state');
+const Role = require('./role');
+const RoleType = "harvester.basic";
 
-module.exports = (Game, messageBus) => {
+module.exports = (Game, behaviour) => {
 
   // Predicates
-  var isFull = (creep) => {
-    // TODO: What if we are carring more than just energy?
+  const isFull = (creep) => {
+    // TODO: What if we are carrying more than just energy?
     return creep.carry.energy >= creep.carryCapacity;
   };
 
-  var hasTarget = (creep) => {
-    var targetId = creep.memory.target;
-    var target = Game.getObjectById(targetId);
+  const hasTarget = (creep) => {
+    const targetId = creep.memory.target;
+    const target = Game.getObjectById(targetId);
 
-    var hasTarget = !_.isNil(target)
-    if(!hasTarget) return false;
+    const hasTarget = !_.isNil(target);
+    if (!hasTarget) return false;
 
-    var pos = target.pos;
-    var hasPos = !_.isNil(pos);
-    if(!hasPos) return false;
+    const pos = target.pos;
+    const hasPos = !_.isNil(pos);
+    if (!hasPos) return false;
 
-    var validPos = !_.isNil(pos.x) && !_.isNil(pos.y) && !_.isNil(pos.roomName);
-    return validPos;
+    return !_.isNil(pos.x) && !_.isNil(pos.y) && !_.isNil(pos.roomName);
   };
 
-  var hasDepositedAllEnergy = (creep) => {
+  const hasDepositedAllEnergy = (creep) => {
     return creep.carry.energy === 0;
   };
 
-  // Transition Actions
-  var removeTarget = (creep) => {
-    delete creep.memory.target;
-  };
-
-  var assignTarget = (creep) => {
-    return (target) => {
-      creep.memory.target = target;
-    };
-  };
-
   // States & Transitions
-  var RootState = State(RoleType);
-  var NeedsHarvestTargetState = State(RoleType + ".needsHarvestTarget");
-  var HarvestingState = State(RoleType + ".harvesting");
-  var NeedsDeliverTargetState = State(RoleType + ".needsDeliverTarget");
-  var Delivering = State(RoleType + ".delivering");
+  const RootState = State(RoleType);
+  const NeedsHarvestTargetState = State(RoleType + ".needsHarvestTarget");
+  const HarvestingState = State(RoleType + ".harvesting");
+  const NeedsDeliverTargetState = State(RoleType + ".needsDeliverTarget");
+  const Delivering = State(RoleType + ".delivering");
 
   RootState.addTransition(NeedsHarvestTargetState);
   NeedsHarvestTargetState.addTransition(HarvestingState, hasTarget);
   // TODO: Add transition to NeedsHarvestTarget if the target is no longer valid.
-  HarvestingState.addTransition(NeedsDeliverTargetState, isFull, removeTarget);
+  HarvestingState.addTransition(NeedsDeliverTargetState, isFull, behaviour.removeTarget);
   NeedsDeliverTargetState.addTransition(Delivering, hasTarget);
-  Delivering.addTransition(NeedsHarvestTargetState, hasDepositedAllEnergy, removeTarget);
+  Delivering.addTransition(NeedsHarvestTargetState, hasDepositedAllEnergy, behaviour.removeTarget);
 
-  var states = [ RootState, NeedsHarvestTargetState, HarvestingState,
-    NeedsDeliverTargetState, Delivering ];
+  const states = [RootState, NeedsHarvestTargetState, HarvestingState,
+    NeedsDeliverTargetState, Delivering];
 
-  var allTransitions = _.flatMap(states, (state) => state.transitions);
+  const allTransitions = _.flatMap(states, (state) => state.transitions);
 
-  // Sub Roles
-  var sendBusMessage = (creep, message) => {
-    if(Config.VERBOSE) console.log("Creep(" + creep + ") requesting harvest target: ", JSON.stringify(message));
-    messageBus(message);
-  };
-
-  var askForHarvestTarget = (creep) => {
-
-    var message = {
-      type: Config.messageTypes.HARVEST_TARGET_REQUEST,
-      pos: creep.pos,
-      callback: assignTarget(creep)
-    };
-
-    sendBusMessage(creep, message);
-  };
-
-  var askForDeliverTarget = (creep) => {
-
-    var message = {
-      type: Config.messageTypes.ENERGY_DELIVERY_TARGET_REQUEST,
-      pos: creep.pos,
-      energy: creep.carry.energy,
-      callback: assignTarget(creep)
-    };
-
-    sendBusMessage(creep, message);
-  };
-
-  var harvest = (creep) => {
-    var targetId = creep.memory.target;
-    var target = Game.getObjectById(targetId);
-
-    var returnCode = creep.harvest(target);
-    var needsToMove = returnCode === Config.errorCodes.ERR_NOT_IN_RANGE;
-    if(needsToMove) {
-      creep.moveTo(target);
-    }
-  };
-
-  var deliver = (creep) => {
-    var targetId = creep.memory.target;
-    var target = Game.getObjectById(targetId);
-    var returnCode = creep.transfer(target, Config.resourceType.RESOURCE_ENERGY);
-    var needsToMove = returnCode === Config.errorCodes.ERR_NOT_IN_RANGE;
-    if(needsToMove) {
-      creep.moveTo(target);
-    }
-  };
-
-  // Logic
-  var transition = (creep) => {
+  const transition = (creep) => {
     return _.any(allTransitions, (transition) => transition.apply(creep));
   };
 
-  var run = (creep) => {
-    var role = creep.memory.role;
-    var state = Role.getState(role);
+  const run = (creep) => {
+    const role = creep.memory.role;
+    const state = Role.getState(role);
 
-    switch(state) {
+    switch (state) {
       case 'needsHarvestTarget':
-        askForHarvestTarget(creep);
+        behaviour.askForHarvestTarget(creep);
       break;
 
       case 'harvesting':
-        harvest(creep);
+        behaviour.harvest(creep);
       break;
 
       case 'needsDeliverTarget':
-        askForDeliverTarget(creep);
+        behaviour.askForDeliverTarget(creep);
       break;
 
       case 'delivering':
-        deliver(creep);
+        behaviour.deliver(creep);
       break;
 
       default:

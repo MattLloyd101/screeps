@@ -1,7 +1,8 @@
-var Unit = require("./unit");
+const Unit = require("./unit");
 
 module.exports = {
 	harvester: {
+	  masterRole: "harvester",
 		basic: Unit({
       body: {
         WORK: 1,

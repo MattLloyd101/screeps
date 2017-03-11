@@ -1,26 +1,29 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var UnitTypes = require('../config.units.v1');
-var SpawnControllerFactory = require('../controller.spawn.v1');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var mockSpawner = (value) => {
+const UnitTypes = require('../config.units.js');
+const SpawnControllerFactory = require('../controller.spawn.js');
+
+const mockSpawner = (value) => {
   return {
     canCreateCreep: sinon.stub().returns(value),
     createCreep: sinon.stub().returns(value)
   };
-}
+};
 
-var spawnerA = mockSpawner(-4);
-var spawnerB = mockSpawner(-6);
-var spawnerC = mockSpawner(-4);
-var notReadySpawners = [spawnerA, spawnerB, spawnerC];
+const spawnerA = mockSpawner(-4);
+const spawnerB = mockSpawner(-6);
+const spawnerC = mockSpawner(-4);
+const notReadySpawners = [spawnerA, spawnerB, spawnerC];
 
-var spawnerD = mockSpawner(-4);
-var spawnerE = mockSpawner(0);
-var spawnerF = mockSpawner(0);
-var readySpawners = [spawnerD, spawnerE, spawnerF];
+const spawnerD = mockSpawner(-4);
+const spawnerE = mockSpawner(0);
+const spawnerF = mockSpawner(0);
+const readySpawners = [spawnerD, spawnerE, spawnerF];
 
-var spawnController = SpawnControllerFactory();
+const spawnController = SpawnControllerFactory();
 
 describe('Spawn Controller', () => {
 
@@ -29,7 +32,7 @@ describe('Spawn Controller', () => {
     it('returns 0 if all spawners cannot create a creep.', () => {
       spawnController.init(notReadySpawners);
 
-      var canSpawnCount = spawnController.canSpawnCount();
+      const canSpawnCount = spawnController.canSpawnCount();
 
       expect(canSpawnCount).to.be.equal(0);
       expect(spawnerA.canCreateCreep.calledOnce).to.be.true;
@@ -40,7 +43,7 @@ describe('Spawn Controller', () => {
     it('returns the number of spawners that can create a creep.', () => {
       spawnController.init(readySpawners);
 
-      var canSpawnCount = spawnController.canSpawnCount();
+      const canSpawnCount = spawnController.canSpawnCount();
 
       expect(canSpawnCount).to.be.equal(2);
       expect(spawnerD.canCreateCreep.calledOnce).to.be.true;
@@ -53,11 +56,11 @@ describe('Spawn Controller', () => {
   describe('#spawn()', () => {
 
     it('Does not call any spawner if none are ready.', () => {
-      var unitArchetype = UnitTypes.harvester.basic;
-      var unit = unitArchetype.create();
+      const unitArchetype = UnitTypes.harvester.basic;
+      const unit = unitArchetype.create();
       spawnController.init(notReadySpawners);
 
-      var returnValue = spawnController.spawn(unit);
+      const returnValue = spawnController.spawn(unit);
 
       expect(returnValue).to.be.false;
       expect(spawnerA.createCreep.called).to.be.false;
@@ -66,11 +69,11 @@ describe('Spawn Controller', () => {
     });
 
     it('Calls createCreep on a spawner that is ready.', () => {
-      var unitArchetype = UnitTypes.harvester.basic;
-      var unit = unitArchetype.create();
+      const unitArchetype = UnitTypes.harvester.basic;
+      const unit = unitArchetype.create();
       spawnController.init(readySpawners);
 
-      var returnValue = spawnController.spawn(unit);
+      const returnValue = spawnController.spawn(unit);
 
       expect(returnValue).to.be.true;
       expect(spawnerD.createCreep.called).to.be.false;
@@ -78,7 +81,6 @@ describe('Spawn Controller', () => {
         .to.be.true;
       expect(spawnerF.createCreep.called).to.be.false;
     });
-
 
   });
 });

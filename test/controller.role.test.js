@@ -1,23 +1,26 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var RoleControllerFactory = require('../controller.role.v1');
+const Config = require('../config');
+
+const RoleControllerFactory = require('../controller.role.js');
 
 describe('Role Controller', () => {
 
   describe('#performRole()', () => {
 
   	it('Should run the BasicHarvester Role for harvester.basic', () => {
-      var basicHarvesterRole = { transition: sinon.spy(), run: sinon.spy() };
-      var roleDefinitions = { "harvester.basic": basicHarvesterRole };
-      var creep = {
+      const basicHarvesterRole = {transition: sinon.spy(), run: sinon.spy()};
+      const roleDefinitions = {"harvester.basic": basicHarvesterRole};
+      const creep = {
         memory: {
           role: "harvester.basic"
         }
       };
 
-			var roleController = RoleControllerFactory(Config, roleDefinitions);
+			const roleController = RoleControllerFactory(Config, roleDefinitions);
 
       roleController.performRoles([creep]);
 
@@ -27,15 +30,15 @@ describe('Role Controller', () => {
   	});
 
     it('Should run the BasicHarvester Role for harvester.basic.someState', () => {
-      var basicHarvesterRole = { transition: sinon.spy(), run: sinon.spy() };
-      var roleDefinitions = { "harvester.basic": basicHarvesterRole };
-      var creep = {
+      const basicHarvesterRole = {transition: sinon.spy(), run: sinon.spy()};
+      const roleDefinitions = {"harvester.basic": basicHarvesterRole};
+      const creep = {
         memory: {
           role: "harvester.basic.someState"
         }
       };
 
-      var roleController = RoleControllerFactory(Config, roleDefinitions);
+      const roleController = RoleControllerFactory(Config, roleDefinitions);
 
       roleController.performRoles([creep]);
 
@@ -45,14 +48,14 @@ describe('Role Controller', () => {
     });
 
     it('Should not error and not call the role if no definitions are defined for the role', () => {
-      var basicHarvesterRole = { transition: sinon.spy(), run: sinon.spy() };
-      var creep = {
+      const basicHarvesterRole = {transition: sinon.spy(), run: sinon.spy()};
+      const creep = {
         memory: {
           role: "harvester.basic.someState"
         }
       };
 
-      var roleController = RoleControllerFactory(Config, []);
+      const roleController = RoleControllerFactory(Config, []);
 
       roleController.performRole(creep);
 

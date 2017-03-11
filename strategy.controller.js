@@ -1,13 +1,13 @@
-var _ = require('./lodash.poly');
+const _ = require('./lodash.poly');
 
 module.exports = (Config, messageBus, WorldData) => {
 
-  var RequestType = Config.requestTypes;
+  const RequestType = Config.requestTypes;
 
   // Energy Strategy
-  var createEnergyRequest = (controller) => {
+  const createEnergyRequest = (controller) => {
 
-    var room = controller.room;
+    const room = controller.room;
     console.log(JSON.stringify(room));
     return [{
       type: RequestType.ENERGY,
@@ -17,9 +17,9 @@ module.exports = (Config, messageBus, WorldData) => {
     }];
   };
 
-  var energyRequests = () => {
-    var rooms = WorldData.rooms();
-    var allSpawns = _.flatMap(rooms, (room) => {
+  const energyRequests = () => {
+    const rooms = WorldData.rooms();
+    const allSpawns = _.flatMap(rooms, (room) => {
       return WorldData.filteredStructureByType(room.name, Config.structureTypes.CONTROLLER);
     });
 

@@ -1,16 +1,17 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var MessageBusFactory = require('../messageBus');
+const MessageBusFactory = require('../messageBus');
 
 describe('Message Bus', () => {
 
   it('Should isolate multiple message busses', () => {
-    var listenerA = sinon.spy();
-    var listenerB = sinon.spy();
-    var messageBusA = MessageBusFactory();
-    var messageBusB = MessageBusFactory();
+    const listenerA = sinon.spy();
+    const listenerB = sinon.spy();
+    const messageBusA = MessageBusFactory();
+    const messageBusB = MessageBusFactory();
 
     messageBusA.addListener(listenerA);
     messageBusB.addListener(listenerB);
@@ -18,7 +19,7 @@ describe('Message Bus', () => {
     expect(listenerA.called).to.be.false;
     expect(listenerB.called).to.be.false;
 
-    var message = {
+    const message = {
       type: "myMessageType"
     };
     messageBusA(message);
@@ -31,12 +32,12 @@ describe('Message Bus', () => {
 	describe('#addListener() and #apply()', () => {
 
 		it('Should add a listener callback', () => {
-      var listener = sinon.spy();
-      var messageBus = MessageBusFactory();
+      const listener = sinon.spy();
+      const messageBus = MessageBusFactory();
       messageBus.addListener(listener);
 
       expect(listener.called).to.be.false;
-      var message = {
+      const message = {
         type: "myMessageType"
       };
       messageBus(message);
@@ -46,9 +47,9 @@ describe('Message Bus', () => {
 		});
 
     it('Should call multiple listeners in the order they were added', () => {
-      var listenerA = sinon.spy();
-      var listenerB = sinon.spy();
-      var messageBus = MessageBusFactory();
+      const listenerA = sinon.spy();
+      const listenerB = sinon.spy();
+      const messageBus = MessageBusFactory();
 
       messageBus.addListener(listenerA);
       messageBus.addListener(listenerB);
@@ -56,7 +57,7 @@ describe('Message Bus', () => {
       expect(listenerA.called).to.be.false;
       expect(listenerB.called).to.be.false;
 
-      var message = {
+      const message = {
         type: "myMessageType"
       };
       messageBus(message);
@@ -69,19 +70,19 @@ describe('Message Bus', () => {
     });
 
     it('Should be able to only listen to certain message types', () => {
-      var listener = sinon.spy();
-      var messageBus = MessageBusFactory();
+      const listener = sinon.spy();
+      const messageBus = MessageBusFactory();
       messageBus.addListener(listener, "myMessageType");
 
       expect(listener.called).to.be.false;
-      var message = {
+      let message = {
         type: "notMyMessageType"
       };
       messageBus(message);
 
       expect(listener.called).to.be.false;
 
-      var message = {
+      message = {
         type: "myMessageType"
       };
       messageBus(message);

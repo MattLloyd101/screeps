@@ -1,26 +1,27 @@
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var expect = require('chai').expect;
-var Config = require('../config');
-var BodyTypes = Config.bodyTypes;
-var RequestType = Config.requestTypes;
+const Config = require('../config');
+const BodyTypes = Config.bodyTypes;
 
-var UnitFactory = require('../unit');
+const UnitFactory = require('../unit');
 
 describe('Unit', () => {
   describe('#create()', () => {
     it('Should transform the unit prototype into a creatable unit', () => {
-      var unitPrototype = {
+      let unitPrototype = {
         body: {
           WORK: 1,
           CARRY: 1,
           MOVE: 1
         }
       };
-      var unit = UnitFactory(unitPrototype);
+      let unit = UnitFactory(unitPrototype);
 
-      var creatableUnit = unit.create();
+      let creatableUnit = unit.create();
 
-      var expectedUnit = {
+      let expectedUnit = {
         body: [
           BodyTypes.WORK.val,
           BodyTypes.CARRY.val,
@@ -30,18 +31,18 @@ describe('Unit', () => {
       expect(creatableUnit).to.deep.equal(expectedUnit);
 
       // more complicated example
-      var unitPrototype = {
+      unitPrototype = {
         body: {
           WORK: 5,
           CARRY: 2,
           MOVE: 3
         }
       };
-      var unit = UnitFactory(unitPrototype);
+      unit = UnitFactory(unitPrototype);
 
-      var creatableUnit = unit.create();
+      creatableUnit = unit.create();
 
-      var expectedUnit = {
+      expectedUnit = {
         body: [
           BodyTypes.WORK.val,
           BodyTypes.WORK.val,
@@ -62,33 +63,33 @@ describe('Unit', () => {
 
   describe('#buildCost()', () => {
     it('Should calculate the build cost from the prototype.', () => {
-      var unitPrototype = {
+      let unitPrototype = {
         body: {
           WORK: 1,
           CARRY: 1,
           MOVE: 1
         }
       };
-      var unit = UnitFactory(unitPrototype);
+      let unit = UnitFactory(unitPrototype);
 
-      var buildCost = unit.buildCost();
+      let buildCost = unit.buildCost();
 
-      var expedctedBuildCost = 200;
+      let expedctedBuildCost = 200;
       expect(buildCost).to.equal(expedctedBuildCost);
 
       // more complicated example
-      var unitPrototype = {
+      unitPrototype = {
         body: {
           WORK: 5,
           CARRY: 3,
           MOVE: 2
         }
       };
-      var unit = UnitFactory(unitPrototype);
+      unit = UnitFactory(unitPrototype);
 
-      var buildCost = unit.buildCost();
+      buildCost = unit.buildCost();
 
-      var expedctedBuildCost = 750;
+      expedctedBuildCost = 750;
       expect(buildCost).to.equal(expedctedBuildCost);
     });
   });

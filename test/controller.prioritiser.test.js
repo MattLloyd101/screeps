@@ -1,41 +1,41 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
-var messageBus = require('../messageBus')();
-var BodyTypes = Config.bodyTypes;
-var RequestType = Config.requestTypes;
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var PrioritiserFactory = require('../controller.prioritiser.v1');
+const messageBus = require('../messageBus')();
 
-var bodyA = {};
-var bodyB = {};
-var bodyC = {};
-var requestA = {
+const PrioritiserFactory = require('../controller.prioritiser.js');
+
+const bodyA = {};
+const bodyB = {};
+const bodyC = {};
+const requestA = {
   type: 'spawn',
   unit: bodyA,
   priority: 1
 };
-var requestB = {
+const requestB = {
   type: 'spawn',
   unit: bodyB,
   priority: -1
 };
-var requestC = {
+const requestC = {
   type: 'spawn',
   unit: bodyC,
   priority: 5
 };
-var aStrategyMock = {
+const aStrategyMock = {
   spawnRequests: sinon.stub().returns([requestA])
 };
-var bStrategyMock = {
+const bStrategyMock = {
   spawnRequests: sinon.stub().returns([requestB])
 };
-var cStrategyMock = {
+const cStrategyMock = {
   spawnRequests: sinon.stub().returns([requestC])
 };
-var strategies = [aStrategyMock, bStrategyMock, cStrategyMock];
-var spawnControllerMock = {
+const strategies = [aStrategyMock, bStrategyMock, cStrategyMock];
+const spawnControllerMock = {
   spawn: sinon.spy()
 };
 
@@ -44,42 +44,43 @@ describe('Prioritisation controller', () => {
 	describe('#collateSpawns()', () => {
 
 		it('Should return empty array when no strategy asks for anything', () => {
-      var aStrategyMock = {
+      const aStrategyMock = {
         spawnRequests: sinon.stub().returns([])
       };
-      var bStrategyMock = {
+      const bStrategyMock = {
         spawnRequests: sinon.stub().returns([])
       };
-      var cStrategyMock = {
+      const cStrategyMock = {
         spawnRequests: sinon.stub().returns([])
       };
-      var strategies = [aStrategyMock, bStrategyMock, cStrategyMock];
+      const strategies = [aStrategyMock, bStrategyMock, cStrategyMock];
 
-      var spawnControllerMock = {
+      const spawnControllerMock = {
         spawn: sinon.spy()
       };
-			var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
+			const prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawnRequests();
+      const spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests).to.have.members([]);
+
       expect(aStrategyMock.spawnRequests.calledOnce).to.be.true;
       expect(bStrategyMock.spawnRequests.calledOnce).to.be.true;
       expect(cStrategyMock.spawnRequests.calledOnce).to.be.true;
 		});
 
     it('Should merge multiple strategies requests', () => {
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
+      const prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawnRequests();
+      const spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests).to.deep.have.members([bodyA, bodyB, bodyC]);
     });
 
     it('Should order the requested strategies by priority', () => {
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
+      const prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
-      var spawnRequests = prioritiser.collateSpawnRequests();
+      const spawnRequests = prioritiser.collateSpawnRequests();
 
       expect(spawnRequests[0]).to.equal(bodyC);
       expect(spawnRequests[1]).to.equal(bodyA);
@@ -91,11 +92,11 @@ describe('Prioritisation controller', () => {
   describe('#performSpawns()', () => {
 
     it('Should not attempt to spawn if the Spawner is not ready', () => {
-      var spawnControllerMock = {
+      const spawnControllerMock = {
         canSpawnCount: sinon.stub().returns(0),
         spawn: sinon.spy()
       };
-      var prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
+      const prioritiser = PrioritiserFactory(strategies, spawnControllerMock, messageBus);
 
       prioritiser.performSpawns();
 

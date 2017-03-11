@@ -1,15 +1,17 @@
-var gcl = require('./config.gcl');
-var bodyTypes = require('./config.bodyTypes');
-var unitTypes = require('./config.units.v1');
+const gcl = require('./config.gcl');
+const bodyTypes = require('./config.bodyTypes');
+const unitTypes = require('./config.units.js');
 
-var VERBOSE = 6;
-var DEBUG = 5;
-var INFO = 4;
-var WARN = 3;
-var ERROR = 2;
-var CRITICAL = 1;
-var OFF = 0;
-var LOG_LEVEL = DEBUG;
+const VERBOSE = 6;
+const DEBUG = 5;
+const INFO = 4;
+const WARN = 3;
+const ERROR = 2;
+const CRITICAL = 1;
+//noinspection JSUnusedLocalSymbols
+const OFF = 0;
+
+const LOG_LEVEL = DEBUG;
 
 module.exports = {
   IterationMax: 10,
@@ -28,6 +30,7 @@ module.exports = {
 	},
   objectTypes: {
     SOURCE: 'source',
+    MINERAL: 'mineral',
     STRUCTURE: 'structure',
     TERRAIN: 'terrain',
     CREEP: 'creep'

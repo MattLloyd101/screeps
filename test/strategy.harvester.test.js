@@ -1,27 +1,30 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Config = require('../config');
-var MessageBus = require('../MessageBus');
+const sinon = require('sinon');
+const describe = require("mocha").describe;
+const it = require("mocha").it;
+const expect = require('chai').expect;
 
-var UnitTypes = Config.unitTypes;
-var RequestType = Config.requestTypes;
+const Config = require('../config');
+const MessageBus = require('../MessageBus');
 
-var HarvesterStrategyFactory = require('../strategy.harvester.v1');
+const UnitTypes = Config.unitTypes;
+const RequestType = Config.requestTypes;
+
+const HarvesterStrategyFactory = require('../strategy.harvester.js');
 
 describe('Harvester Strategy', () => {
 
 	describe('#spawnRequests()', () => {
 
 		it('Should request a new basic harvester when harvesters == 0', () => {
-      var messageBus = MessageBus();
-			var harvesterStrategy = HarvesterStrategyFactory(Config, messageBus);
+      const messageBus = MessageBus();
+			const harvesterStrategy = HarvesterStrategyFactory(Config, messageBus);
 
-			var requests = harvesterStrategy.spawnRequests();
+			const requests = harvesterStrategy.spawnRequests();
 
 			expect(requests).to.have.length(1);
 
-      var spawnRequest = requests[0];
-      var expectedSpawnRequest = {
+      const spawnRequest = requests[0];
+      const expectedSpawnRequest = {
         type: RequestType.SPAWN,
         unit: UnitTypes.harvester.basic.create(),
         priority: 1
@@ -33,7 +36,7 @@ describe('Harvester Strategy', () => {
 	});
 
   it('Should respond to HarvesterTargetRequests with a target Source', () => {
-    var sources = [
+    const sources = [
       {
         "x": 35,
         "y": 20,
@@ -51,14 +54,11 @@ describe('Harvester Strategy', () => {
         }
       }
     ];
-    var WorldData = {
+    const WorldData = {
       filteredRoomDataByType: sinon.stub().returns(sources)
     };
-    var messageBus = MessageBus();
-    var targetSource = {};
-    var harvesterStrategy = HarvesterStrategyFactory(Config, messageBus, WorldData);
-
-    var message = {
+    const messageBus = MessageBus();
+    const message = {
       type: Config.messageTypes.HARVEST_TARGET_REQUEST,
       pos: {
         roomName: 'sim',
