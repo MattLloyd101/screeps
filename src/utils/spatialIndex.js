@@ -1,4 +1,4 @@
-const __ = require('./../lodash.poly.js');
+const __ = require('./lodash.poly.js');
 
 // TODO: probably want something like a quadtree here instead.
 // This will do for the moment but when we get more spatial lookups we should invest in a quadtree impl.

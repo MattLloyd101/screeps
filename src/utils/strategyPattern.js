@@ -1,4 +1,4 @@
-const __ = require('./../lodash.poly');
+const __ = require('./lodash.poly.js');
 
 module.exports = (strategies) => {
   const getFacts = (strategies) => __.flatMap(strategies, (strategy) => strategy.getFacts());

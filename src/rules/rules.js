@@ -1,4 +1,4 @@
-const __ = require('./../lodash.poly');
+const __ = require('./../utils/lodash.poly.js');
 const RulePath = require("./rulePath");
 
 const dynamicFactPath = ["__dynamicFacts"];

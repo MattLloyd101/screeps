@@ -1,4 +1,4 @@
-const __ = require('./lodash.poly.js');
+const __ = require('./utils/lodash.poly.js');
 
 const decomposeRole = (role) => {
   const parts = __.words(role, /[^.]+/g);

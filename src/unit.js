@@ -1,4 +1,4 @@
-const __ = require("./lodash.poly.js");
+const __ = require("./utils/lodash.poly.js");
 const BodyTypes = require("./config/bodyTypes.js");
 
 module.exports = (unitPrototype) => {

@@ -1,4 +1,4 @@
-const __ = require("../lodash.poly");
+const __ = require("../utils/lodash.poly.js");
 
 const matches = (context, path) => {
   return __.foldl(path, (tuple, pathPart) => {

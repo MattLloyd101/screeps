@@ -1,4 +1,4 @@
-const __ = require('./lodash.poly.js');
+const __ = require('./utils/lodash.poly.js');
 
 const RuleEngine = require('node-rules');
 const Rules = require('./rules/rules');
