@@ -15,15 +15,17 @@ module.exports = (room) => {
   const getFacts = () => {
     return [
       {
+        room,
         recommendedHarvesterCount: recommendedHarvesterCount(),
         harvesterCount: currHarvesterCount()
       }
     ];
   };
 
-  const spawnHarvester = Rules.rule (
-    (fact) => fact.harvesterCount < fact.recommendedHarvesterCount
-  )((R, fact) => {
+  const spawnHarvester = Rules.rule((fact) => {
+    return fact.room.name() == room.name() &&
+        fact.harvesterCount < fact.recommendedHarvesterCount
+  })((R, fact) => {
     const newFact = {
       type: "spawn",
 
